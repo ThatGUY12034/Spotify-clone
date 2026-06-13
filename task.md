@@ -63,6 +63,16 @@ Status legend: ⬜ todo · 🟡 in progress · ✅ done · ⏸️ deferred
   VERIFIED in-browser (2026-06-13): like → heart fills + server playlist `["9"]`; Liked Songs
   page shows it; unlike → empty state + server playlist `[]`; console clean; build 112 modules.
 
+## Phase 4 — Deployment ✅ LIVE (2026-06-13)
+- ✅ GitHub: https://github.com/ThatGUY12034/Spotify-clone (public). No secrets tracked.
+- ✅ Backends on Render (free): user `…-qmkc`, song `…-dlud`, admin `…-1w75` (`.onrender.com`).
+  Render appends a random suffix (URLs are globally unique) — the bare service name is NOT the URL.
+- ✅ Frontend on Vercel: https://spotify-clone-kappa-three.vercel.app (root dir `frontend`).
+- ✅ Verified live: correct backend URLs baked into bundle, CORS `*`, register/login/playlist 7/7,
+  admin `User_URL` wiring (non-admin → 403). Config in `render.yaml`, `frontend/vercel.json`,
+  `DEPLOY.md`; rationale in `decisions/0004`.
+- ⏸️ Secrets still need rotating (public repo) — `decisions/0003`.
+
 ## End-to-end test (2026-06-13) — 20/20 passed ✅
 
 After the user restarted the MongoDB Atlas cluster (now live; Redis still dead), ran a full
