@@ -41,8 +41,14 @@ Status legend: ⬜ todo · 🟡 in progress · ✅ done · ⏸️ deferred
 - ✅ Fix user service: no longer crashes on Mongo failure (await + try/catch + `connection.on("error")`);
   `app.listen(port)` now respects `PORT`; `connectDb` awaited. Verified: process survives dead Mongo,
   `/` stays up, login returns a clean JSON error instead of crashing.
-- ⬜ Playlist CRUD endpoints (user service)
-- ⬜ Secrets hygiene: git init, .gitignore, rotate committed keys
+- ✅ Playlist CRUD endpoints (user service): `GET /user/playlist`, `POST /user/playlist/:songId`,
+  `DELETE /user/playlist/:songId` — all `isAuth`-gated, operate on the `playlist: string[]` field.
+  Add is idempotent; remove 404s if absent. Typechecks clean (`tsc --noEmit`).
+  CAVEAT: not exercised end-to-end — needs a live MongoDB + a logged-in user.
+- ✅ Secrets hygiene: `git init` + clean initial commit; root `.gitignore` ignores
+  `node_modules/`, `dist/`, all `.env`; committed `*.env.example` templates for every service.
+  Verified no real `.env` is tracked (`git check-ignore`). Secrets never entered history.
+  ⏸️ Key ROTATION is a manual provider-dashboard step — see `decisions/0003`.
 - ✅ Admin UI in frontend (`/admin`, gated by `role === "admin"`, link in Navbar for admins):
   add album, add song (with album select), upload/replace song thumbnail, delete album/song.
   Added `SongContext.reload()` so the library refreshes after changes. Verified: build clean,

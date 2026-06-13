@@ -24,6 +24,9 @@ song/admin services (`albums`, `songs`, `album_songs_<id>` keys, 30-min TTL, inv
 - `POST /user/register` — `{ name, email, password }` → `{ user, token }`
 - `POST /user/login` — `{ email, password }` → `{ user, token }`
 - `GET  /user/me` — auth (Bearer/`token` header) → user
+- `GET    /user/playlist` — auth → `{ playlist: string[] }`
+- `POST   /user/playlist/:songId` — auth → add song id (idempotent) → `{ message, playlist }`
+- `DELETE /user/playlist/:songId` — auth → remove song id → `{ message, playlist }`
 
 **song service (8000)**
 - `GET /album/all` → `{ albums }`
@@ -63,9 +66,15 @@ Frontend: `npm install` then `npm run dev`.
 - `decisions/` — one markdown file per non-trivial decision (ADR style). Read before changing
   architecture so we don't relitigate settled choices.
 
-## Known backend issues (deferred — fix in the backend pass)
+## Known backend issues
 
-- song service `getAllSongs`: cache-miss / Redis-down path can return `undefined` songs.
-- user service `index.ts`: `app.listen(5000)` is hardcoded, ignores `PORT`; `connectDb` not awaited.
-- Secrets are committed in `*/.env`; no git repo yet. Rotate + gitignore later.
-- No `playlist` CRUD endpoints despite the field existing on the User model.
+Resolved in the backend pass (2026-06-13):
+- ✅ song service `getAllSongs` undefined-return on Redis-down — now falls back to DB.
+- ✅ user service `index.ts` — `app.listen(PORT)`, `connectDb` awaited, survives dead Mongo.
+- ✅ Secrets no longer committed: `git init` + `.gitignore` (`*/.env`) + `*.env.example` templates.
+  ⚠️ Key ROTATION still pending — manual provider-dashboard step, see `decisions/0003`.
+- ✅ Playlist CRUD endpoints added (see user service API above).
+
+Outstanding:
+- External services: MongoDB Atlas + Redis are dead (DNS ENOTFOUND). Auth + admin writes
+  cannot be exercised until `MONGO_URI` points at a live MongoDB. Neon + Cloudinary are live.
