@@ -1,0 +1,59 @@
+# Render Blueprint — deploys the 3 backend services.
+# Import this from the Render dashboard: New + > Blueprint > pick this repo.
+# All secrets are `sync: false`, meaning you fill them in the dashboard (never committed).
+#
+# NOTE: the service folders contain spaces ("user service" etc.). If the Blueprint
+# importer rejects the rootDir, create the 3 web services manually instead (see DEPLOY.md);
+# the dashboard accepts spaced root directories fine.
+
+services:
+  - type: web
+    name: spotify-user-service
+    runtime: node
+    plan: free
+    rootDir: "user service"
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SEC
+        sync: false
+
+  - type: web
+    name: spotify-song-service
+    runtime: node
+    plan: free
+    rootDir: "song service"
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: Redis_Password
+        sync: false
+
+  - type: web
+    name: spotify-admin-service
+    runtime: node
+    plan: free
+    rootDir: "admin service"
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: Cloud_Name
+        sync: false
+      - key: Cloud_API_Key
+        sync: false
+      - key: Cloud_API_Secret
+        sync: false
+      - key: Redis_Password
+        sync: false
+      # Set this to the deployed user-service URL once it exists,
+      # e.g. https://spotify-user-service.onrender.com
+      - key: User_URL
+        sync: false
