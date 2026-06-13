@@ -1,14 +1,22 @@
-import { FaMusic, FaPlay, FaPause } from "react-icons/fa";
+import { FaMusic, FaPlay, FaPause, FaHeart, FaRegHeart } from "react-icons/fa";
 import { useSong } from "../context/SongContext";
+import { useUser } from "../context/UserContext";
 import type { Song } from "../types";
 
 const SongCard = ({ song, queue }: { song: Song; queue?: Song[] }) => {
   const { playSong, currentSong, isPlaying, togglePlay } = useSong();
+  const { isAuth, isInPlaylist, togglePlaylist } = useUser();
   const isCurrent = currentSong?.id === song.id;
+  const liked = isInPlaylist(song.id);
 
   const handleClick = () => {
     if (isCurrent) togglePlay();
     else playSong(song, queue);
+  };
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation(); // don't trigger play
+    togglePlaylist(song.id);
   };
 
   return (
@@ -31,6 +39,19 @@ const SongCard = ({ song, queue }: { song: Song; queue?: Song[] }) => {
         <button className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-[#1db954] text-black flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-lg">
           {isCurrent && isPlaying ? <FaPause /> : <FaPlay className="ml-0.5" />}
         </button>
+        {isAuth && (
+          <button
+            onClick={handleLike}
+            title={liked ? "Remove from Liked Songs" : "Add to Liked Songs"}
+            className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center transition ${
+              liked
+                ? "text-[#1db954] opacity-100"
+                : "text-white opacity-0 group-hover:opacity-100 hover:scale-110"
+            }`}
+          >
+            {liked ? <FaHeart /> : <FaRegHeart />}
+          </button>
+        )}
       </div>
       <p
         className={`font-semibold truncate ${

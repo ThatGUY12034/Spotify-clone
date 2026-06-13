@@ -54,6 +54,15 @@ Status legend: ⬜ todo · 🟡 in progress · ✅ done · ⏸️ deferred
   route guard redirects non-admins, page renders live albums/songs (temporary gate-bypass screenshot).
   Admin create/delete VERIFIED end-to-end (2026-06-13) once MongoDB came back — see below.
 
+## Phase 3 — Playlist UI (frontend)
+- ✅ Wired the playlist endpoints into the UI:
+  - `UserContext` now holds `playlist: string[]` (hydrated from `/user/me`), with
+    `isInPlaylist()` and an optimistic `togglePlaylist()` (reverts on failure).
+  - `SongCard` shows a heart toggle (filled green when liked), only when logged in.
+  - New `Liked` page at `/liked` (auth-gated) listing liked songs; sidebar link with count.
+  VERIFIED in-browser (2026-06-13): like → heart fills + server playlist `["9"]`; Liked Songs
+  page shows it; unlike → empty state + server playlist `[]`; console clean; build 112 modules.
+
 ## End-to-end test (2026-06-13) — 20/20 passed ✅
 
 After the user restarted the MongoDB Atlas cluster (now live; Redis still dead), ran a full

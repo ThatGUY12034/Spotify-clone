@@ -21,6 +21,10 @@ interface UserContextType {
     password: string
   ) => Promise<boolean>;
   logout: () => void;
+  // Playlist (saved song ids)
+  playlist: string[];
+  isInPlaylist: (songId: string | number) => boolean;
+  togglePlaylist: (songId: string | number) => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -32,6 +36,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   );
   const [loading, setLoading] = useState<boolean>(!!token);
   const [error, setError] = useState<string | null>(null);
+  const [playlist, setPlaylist] = useState<string[]>([]);
 
   // On mount (or token change), hydrate the user from the token.
   useEffect(() => {
@@ -44,7 +49,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     (async () => {
       try {
         const { data } = await userApi.get("/user/me");
-        if (active) setUser(data);
+        if (active) {
+          setUser(data);
+          setPlaylist(data.playlist ?? []);
+        }
       } catch {
         // Token invalid/expired — clear it.
         if (active) {
@@ -66,6 +74,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setAuthToken(newToken);
     setToken(newToken);
     setUser(newUser);
+    setPlaylist(newUser.playlist ?? []);
   };
 
   const loginUser = async (email: string, password: string) => {
@@ -105,6 +114,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     setAuthToken(null);
     setToken(null);
     setUser(null);
+    setPlaylist([]);
+  };
+
+  const isInPlaylist = (songId: string | number) =>
+    playlist.includes(String(songId));
+
+  // Add/remove a song from the playlist. Optimistic: update local state first,
+  // then sync with the server; roll back if the request fails.
+  const togglePlaylist = async (songId: string | number) => {
+    if (!user) return;
+    const id = String(songId);
+    const adding = !playlist.includes(id);
+    const prev = playlist;
+    setPlaylist(adding ? [...playlist, id] : playlist.filter((s) => s !== id));
+    try {
+      if (adding) await userApi.post(`/user/playlist/${id}`);
+      else await userApi.delete(`/user/playlist/${id}`);
+    } catch {
+      setPlaylist(prev); // revert on failure
+    }
   };
 
   return (
@@ -118,6 +147,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         loginUser,
         registerUser,
         logout,
+        playlist,
+        isInPlaylist,
+        togglePlaylist,
       }}
     >
       {children}

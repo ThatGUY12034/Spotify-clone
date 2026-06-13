@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import { FaHeart } from "react-icons/fa";
 import PlaylistCard from "./PlaylistCard";
 import { useSong } from "../context/SongContext";
+import { useUser } from "../context/UserContext";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const { albums } = useSong();
+  const { isAuth, playlist } = useUser();
 
   return (
     <div className="w-[25%] h-full p-2 flex-col gap-2 text-white hidden lg:flex">
@@ -22,6 +25,23 @@ const Sidebar = () => {
           <img src="/search.png" alt="search" className="w-6 h-6" />
           <p className="font-bold">Search</p>
         </div>
+
+        {isAuth && (
+          <div
+            className="flex items-center gap-3 pl-6 cursor-pointer py-3 hover:bg-[#242424] transition"
+            onClick={() => navigate("/liked")}
+          >
+            <span className="w-6 h-6 flex items-center justify-center text-[#1db954]">
+              <FaHeart />
+            </span>
+            <p className="font-bold">Liked Songs</p>
+            {playlist.length > 0 && (
+              <span className="ml-auto mr-4 text-xs text-gray-400">
+                {playlist.length}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Library Section */}

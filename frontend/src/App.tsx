@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Album from "./pages/Album";
 import Admin from "./pages/Admin";
+import Liked from "./pages/Liked";
 import { useUser } from "./context/UserContext";
 
 const App = () => {
@@ -22,6 +23,10 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/album/:id" element={<Album />} />
+        <Route
+          path="/liked"
+          element={isAuth ? <Liked /> : <Navigate to="/login" replace />}
+        />
         <Route
           path="/admin"
           element={
