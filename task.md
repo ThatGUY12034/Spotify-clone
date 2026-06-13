@@ -43,8 +43,7 @@ Status legend: ⬜ todo · 🟡 in progress · ✅ done · ⏸️ deferred
   `/` stays up, login returns a clean JSON error instead of crashing.
 - ✅ Playlist CRUD endpoints (user service): `GET /user/playlist`, `POST /user/playlist/:songId`,
   `DELETE /user/playlist/:songId` — all `isAuth`-gated, operate on the `playlist: string[]` field.
-  Add is idempotent; remove 404s if absent. Typechecks clean (`tsc --noEmit`).
-  CAVEAT: not exercised end-to-end — needs a live MongoDB + a logged-in user.
+  Add is idempotent; remove 404s if absent. VERIFIED end-to-end (2026-06-13, see below).
 - ✅ Secrets hygiene: `git init` + clean initial commit; root `.gitignore` ignores
   `node_modules/`, `dist/`, all `.env`; committed `*.env.example` templates for every service.
   Verified no real `.env` is tracked (`git check-ignore`). Secrets never entered history.
@@ -53,7 +52,16 @@ Status legend: ⬜ todo · 🟡 in progress · ✅ done · ⏸️ deferred
   add album, add song (with album select), upload/replace song thumbnail, delete album/song.
   Added `SongContext.reload()` so the library refreshes after changes. Verified: build clean,
   route guard redirects non-admins, page renders live albums/songs (temporary gate-bypass screenshot).
-  CAVEAT: create/delete happy-path is unverified end-to-end — admin auth needs a live MongoDB.
+  Admin create/delete VERIFIED end-to-end (2026-06-13) once MongoDB came back — see below.
+
+## End-to-end test (2026-06-13) — 20/20 passed ✅
+
+After the user restarted the MongoDB Atlas cluster (now live; Redis still dead), ran a full
+harness against all three live services. Read paths (Neon), auth (Mongo), playlist CRUD, the
+admin 403 guard, and a real admin create→verify→delete album round-trip (Cloudinary upload +
+Neon insert/delete) all passed. DB restored to original state (test users cleaned up).
+Note: stale service instances from earlier in the session (started while Mongo was dead) had
+to be killed first — they held the ports with dead Mongo connections (buffering timeouts).
 
 ## Environment status (smoke test, 2026-06-13)
 - ✅ Neon Postgres — reachable, has seed data (2 albums, 5 songs).
